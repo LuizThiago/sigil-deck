@@ -153,8 +153,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _cardCount: 10
   _columns: 5
-  _pairEvaluationSecs: 1.5
-  _failLimit: 5
+  _pairEvaluationSecs: 0.25
+  _failLimit: -1
   _cardPrefab: {fileID: 1794205000401830659, guid: 3e20dc71124c2f843aecfe77b6f29a37, type: 3}
   _gridRoot: {fileID: 892458908}
 --- !u!4 &182455912

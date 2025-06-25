@@ -7,6 +7,7 @@ namespace Cyberspeed.CardMatch.Cards
 {
     public class CardVisualController : MonoBehaviour
     {
+        [SerializeField] private GameObject _root;
         [SerializeField] private CardVisual _frontVisual;
         [SerializeField] private CardVisual _backVisual;
         
@@ -14,39 +15,15 @@ namespace Cyberspeed.CardMatch.Cards
         
         public void SetState(CardState state)
         {
-            switch (state)
+            if (state == CardState.Disabled)
             {
-                case CardState.Disabled:
-                    gameObject.SetActive(false);
-                    return;
-                case CardState.Revealed:
-                    Reveal();
-                    break;
-                case CardState.Hidden:
-                    Hide();
-                    break;
+                _root.SetActive(false);
             }
         }
         
         public void SetSymbolText(string symbol)
         {
             _frontVisual.SetSymbolText(symbol);
-        }
-        
-        #endregion
-        
-        #region Visual State Handling
-
-        private void Reveal()
-        {
-            _frontVisual.Image.gameObject.SetActive(true);
-            _backVisual.Image.gameObject.SetActive(false);
-        }
-        
-        private void Hide()
-        {
-            _frontVisual.Image.gameObject.SetActive(false);
-            _backVisual.Image.gameObject.SetActive(true);
         }
         
         #endregion

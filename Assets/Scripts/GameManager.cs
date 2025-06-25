@@ -132,8 +132,8 @@ namespace Cyberspeed.CardMatch.Game
                 }
                 else
                 {
-                    pair.First.HideCard();
-                    pair.Second.HideCard();
+                    pair.First.MissCard();
+                    pair.Second.MissCard();
                     MissPair();
 
                     if (_isGameOver) break;

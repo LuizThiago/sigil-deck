@@ -10,6 +10,7 @@ namespace Cyberspeed.CardMatch.Cards
         public event Action<Card> OnCardClicked;
         
         [SerializeField] private CardVisualController _visualController;
+        [SerializeField] private CardAnimationsController _animationsController;
         
         private CardState _currentState = CardState.Hidden;
         private bool _isBlocked = false;
@@ -29,9 +30,19 @@ namespace Cyberspeed.CardMatch.Cards
         
         #region Card State
 
-        public void RevealCard() => SetState(CardState.Revealed);
-        
+        public void RevealCard()
+        {
+            SetState(CardState.Revealed);
+            _animationsController.PlayReveal();
+        }
+
         public void HideCard() => SetState(CardState.Hidden);
+        
+        public void MissCard()
+        {
+            SetState(CardState.Hidden);
+            _animationsController.PlayShake(() => _animationsController.PlayHide());
+        }
 
         public void DisableCard()
         {
@@ -40,15 +51,16 @@ namespace Cyberspeed.CardMatch.Cards
         
         public void SetBlocked(bool isBlocked)
         {
-            _isBlocked = true;
+            _isBlocked = isBlocked;
         }
 
         private void SetState(CardState state)
         {
-            if (IsBlocked || _currentState == state) return;
+            if (_currentState == state) return;
             
             _currentState = state;
             _visualController.SetState(state);
+            SetBlocked(_currentState != CardState.Hidden);
         }
         
         #endregion
@@ -57,7 +69,7 @@ namespace Cyberspeed.CardMatch.Cards
     
         public void OnPointerEnter(PointerEventData eventData)
         {
-            
+            _animationsController.PlayPunchScale();
         }
     
         public void OnPointerExit(PointerEventData eventData)

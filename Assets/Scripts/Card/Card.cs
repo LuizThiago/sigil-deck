@@ -47,6 +47,7 @@ namespace Cyberspeed.CardMatch.Cards
         public void DisableCard()
         {
             SetState(CardState.Disabled);
+            _animationsController.PlayDestroy(() => _visualController.SetState(CardState.Disabled));
         } 
         
         public void SetBlocked(bool isBlocked)
@@ -59,7 +60,6 @@ namespace Cyberspeed.CardMatch.Cards
             if (_currentState == state) return;
             
             _currentState = state;
-            _visualController.SetState(state);
             SetBlocked(_currentState != CardState.Hidden);
         }
         

@@ -14,6 +14,7 @@ namespace Cyberspeed.CardMatch.Cards
         [SerializeField] private PunchScaleSettings _punchScaleSettings;
         [SerializeField] private FlipSettings _flipSettings;
         [SerializeField] private ShakeSettings _shakeSettings;
+        [SerializeField] private DestroySettings _destroySettings;
 
         private Tween _currentTween;
         private Sequence _currentSequence;
@@ -106,6 +107,30 @@ namespace Cyberspeed.CardMatch.Cards
                     _isPlayingAnimation = false;
                 });
         }
+        
+        public void PlayDestroy(Action onComplete = null)
+        {
+            if (_isPlayingAnimation) return;
+            _isPlayingAnimation = true;
+
+            _currentSequence = DOTween.Sequence();
+
+            _currentSequence.Append(_rectTransform.DOPunchScale(
+                Vector3.one * _destroySettings.PunchScale,
+                _destroySettings.PunchDuration,
+                _destroySettings.Vibrato,
+                _destroySettings.Elasticity
+            ));
+
+            _currentSequence.Append(_rectTransform.DOScale(Vector3.zero, _destroySettings.ShrinkDuration)
+                .SetEase(_destroySettings.ShrinkEase));
+
+            _currentSequence.OnComplete(() =>
+            {
+                _isPlayingAnimation = false;
+                onComplete?.Invoke();
+            });
+        }
 
         #endregion
 
@@ -166,6 +191,17 @@ namespace Cyberspeed.CardMatch.Cards
             public bool FadeOut = true;
         }
 
+        [System.Serializable]
+        private class DestroySettings
+        {
+            public float PunchScale = 0.3f;
+            public float PunchDuration = 0.25f;
+            public int Vibrato = 10;
+            public float Elasticity = 1f;
+            public float ShrinkDuration = 0.3f;
+            public Ease ShrinkEase = Ease.InBack;
+        }
+        
         #endregion
     }
 }

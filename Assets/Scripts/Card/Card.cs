@@ -12,8 +12,9 @@ namespace Cyberspeed.CardMatch.Cards
         [SerializeField] private CardVisualController _visualController;
         
         private CardState _currentState = CardState.Hidden;
+        private bool _isBlocked = false;
        
-        public bool IsBlocked => _currentState == CardState.Disabled;
+        public bool IsBlocked => _isBlocked || _currentState == CardState.Disabled;
         public int Symbol { get; private set; }
 
         #region Initialization
@@ -36,6 +37,11 @@ namespace Cyberspeed.CardMatch.Cards
         {
             SetState(CardState.Disabled);
         } 
+        
+        public void SetBlocked(bool isBlocked)
+        {
+            _isBlocked = true;
+        }
 
         private void SetState(CardState state)
         {

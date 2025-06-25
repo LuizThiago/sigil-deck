@@ -16,16 +16,19 @@ namespace Cyberspeed.CardMatch.Game
         [SerializeField] private int _cardCount = 10;
         [SerializeField] private int _columns = 3;
         [SerializeField] private float _pairEvaluationSecs = 3f;
+        [Tooltip("-1 = no limits")][SerializeField] private int _failLimit = 3;
         [Header("References")]
         [SerializeField] private Card _cardPrefab;
         [SerializeField] private GridLayoutGroup _gridRoot;
-
-        private readonly List<Card> _cards = new List<Card>();
-        private readonly List<Card> _selectedCards = new List<Card>();
         
-        private const int Pair = 2;
-        private bool _isInputDisabled = false;
-    
+        private readonly Queue<PairCheckRequest> _pairQueue = new();
+        private readonly List<Card> _revealBuffer = new();
+        private bool _isProcessingQueue = false;
+        private int _failCount = 0;
+        private bool _isGameOver = false;
+        private int _totalPairs;
+        private int _pairsFound;
+        
         #region MonoBehaviour
         
         private void Awake()
@@ -57,8 +60,9 @@ namespace Cyberspeed.CardMatch.Game
                 var card = Instantiate(_cardPrefab, _gridRoot.transform);
                 card.Initialize(symbol);
                 card.OnCardClicked += OnCardClicked;
-                _cards.Add(card);
             }
+            
+            _totalPairs = _cardCount / 2;
         }
         
         private List<int> GenerateShuffledSymbols()
@@ -86,76 +90,109 @@ namespace Cyberspeed.CardMatch.Game
         
         private void OnCardClicked(Card card)
         {
-            if (_isInputDisabled || _selectedCards.Contains(card)) return;
-            
-            _selectedCards.Add(card);
+            if (_isGameOver || _revealBuffer.Contains(card)) return;
+
             card.RevealCard();
+            _revealBuffer.Add(card);
 
-            if (_selectedCards.Count != Pair) return;
+            if (_revealBuffer.Count < 2) return;
             
-            StartCoroutine(EvaluatePair());
-        }
+            var request = new PairCheckRequest
+            {
+                First = _revealBuffer[0],
+                Second = _revealBuffer[1]
+            };
 
-        private IEnumerator EvaluatePair()
-        {
-            _isInputDisabled = true;
-            
-            yield return new WaitForSeconds(_pairEvaluationSecs);
-            
-            if (IsPair())
-            {
-                ScorePair();
-                DisablePair();
-            }
-            else
-            {
-                MissPair();
-                ResetSelectedCards();
-            }
-            
-            _isInputDisabled = false;
+            _pairQueue.Enqueue(request);
+            _revealBuffer.Clear();
+
+            if (!_isProcessingQueue)
+                StartCoroutine(ProcessQueue());
         }
         
-        private bool IsPair()
+        #endregion
+        
+        #region Pair Processing
+        
+        private IEnumerator ProcessQueue()
         {
-            var first = _selectedCards[0];
-            var second = _selectedCards[1];
+            _isProcessingQueue = true;
 
-            return first.Symbol == second.Symbol;
+            while (_pairQueue.Count > 0)
+            {
+                var pair = _pairQueue.Dequeue();
+
+                yield return new WaitForSeconds(_pairEvaluationSecs);
+
+                if (pair.First.Symbol == pair.Second.Symbol)
+                {
+                    pair.First.DisableCard();
+                    pair.Second.DisableCard();
+                    ScorePair();
+                }
+                else
+                {
+                    pair.First.HideCard();
+                    pair.Second.HideCard();
+                    MissPair();
+
+                    if (_isGameOver) break;
+                }
+            }
+
+            _isProcessingQueue = false;
         }
 
         private void ScorePair()
         {
+            _pairsFound++;
             OnPairFound?.Invoke();
+            
+            if (_pairsFound >= _totalPairs)
+            {
+                EndGame(isVictory: true);
+            }
         }
         
         private void MissPair()
         {
+            _failCount++;
             OnPairFailed?.Invoke();
-        }
-
-        private void DisablePair()
-        {
-            foreach (var card in _selectedCards)
-            {
-               card.DisableCard();
-            }
             
-            _selectedCards.Clear();
-        }
-        
-        private void ResetSelectedCards()
-        {
-            foreach (var card in _selectedCards)
+            if (_failLimit > 0 && _failCount >= _failLimit)
             {
-                if (card == null) continue;
-                
-                card.HideCard();
+                EndGame(isVictory: false);
             }
-            
-            _selectedCards.Clear();
         }
 
         #endregion
+
+        #region Game End
+        
+        private void EndGame(bool isVictory)
+        {
+            if (isVictory)
+            {
+                Debug.Log("Congratulations! You found all pairs.");
+            }
+            else
+            {
+                Debug.Log("Game Over! You have reached the fail limit.");
+                GameOver();
+            }
+        }
+        
+        private void GameOver()
+        {
+            _isGameOver = true;
+        }
+        
+        #endregion
+        
+        private class PairCheckRequest
+        {
+            public Card First;
+            public Card Second;
+        }
     }
 }

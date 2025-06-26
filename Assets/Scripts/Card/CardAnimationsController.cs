@@ -1,5 +1,7 @@
 using System;
+
 using DG.Tweening;
+
 using UnityEngine;
 
 namespace Cyberspeed.CardMatch.Cards
@@ -33,11 +35,11 @@ namespace Cyberspeed.CardMatch.Cards
         #endregion
 
         #region Public Methods
-        
+
         public void ResetAnimations()
         {
             KillCurrentTween();
-            
+
             _rectTransform.localScale = _initialScale;
             _rectTransform.localRotation = _initialRotation;
             _rectTransform.localPosition = _initialPosition;
@@ -45,23 +47,25 @@ namespace Cyberspeed.CardMatch.Cards
 
         public void PlayPunchScale()
         {
-            if (_isPlayingAnimation) return;
-            _isPlayingAnimation = true;
-            
+            if (_isPlayingAnimation || (_currentTween != null && _currentTween.IsActive())) return;
+
             _currentTween = _rectTransform.DOPunchScale(
                 Vector3.one * _punchScaleSettings.PunchScale,
                 _punchScaleSettings.Duration,
                 _punchScaleSettings.Vibrato,
                 _punchScaleSettings.Elasticity
-            ).SetUpdate(true).OnComplete(() => _isPlayingAnimation = false);
+            ).SetUpdate(true);
         }
-        
+
         public void PlayReveal(Action onComplete = null) => PlayFlip(_backVisual, _frontVisual, _flipSettings, onComplete);
-        
+
         public void PlayHide(Action onComplete = null) => PlayFlip(_frontVisual, _backVisual, _flipSettings, onComplete);
-        
+
         private void PlayFlip(Transform from, Transform to, FlipSettings settings, Action onComplete = null)
         {
+            KillCurrentTween();
+            _isPlayingAnimation = true;
+
             from.gameObject.SetActive(true);
             to.gameObject.SetActive(false);
 
@@ -82,13 +86,16 @@ namespace Cyberspeed.CardMatch.Cards
             _currentSequence.Append(to.DOLocalRotate(Vector3.zero, settings.FlipDuration / 2f)
                 .SetEase(settings.EaseOut));
 
-            if (onComplete != null)
-                _currentSequence.OnComplete(() => onComplete.Invoke());
+            _currentSequence.OnComplete(() =>
+            {
+                _isPlayingAnimation = false;
+                onComplete?.Invoke();
+            });
         }
-        
+
         public void PlayShake(Action onComplete = null)
         {
-            if (_isPlayingAnimation) return;
+            KillCurrentTween();
             _isPlayingAnimation = true;
 
             _currentTween = _rectTransform.DOShakeAnchorPos(
@@ -107,10 +114,10 @@ namespace Cyberspeed.CardMatch.Cards
                     _isPlayingAnimation = false;
                 });
         }
-        
+
         public void PlayDestroy(Action onComplete = null)
         {
-            if (_isPlayingAnimation) return;
+            KillCurrentTween();
             _isPlayingAnimation = true;
 
             _currentSequence = DOTween.Sequence();
@@ -146,7 +153,7 @@ namespace Cyberspeed.CardMatch.Cards
         private void KillCurrentTween()
         {
             _isPlayingAnimation = false;
-            
+
             if (_currentTween != null && _currentTween.IsActive())
             {
                 _currentTween.Kill();
@@ -158,8 +165,10 @@ namespace Cyberspeed.CardMatch.Cards
                 _currentSequence.Kill();
                 _currentSequence = null;
             }
+
+            _rectTransform.localScale = _initialScale;
         }
-        
+
         #endregion
 
         #region Animation Settings
@@ -172,7 +181,7 @@ namespace Cyberspeed.CardMatch.Cards
             public int Vibrato = 10;
             public float Elasticity = 1f;
         }
-        
+
         [System.Serializable]
         private class FlipSettings
         {
@@ -180,7 +189,7 @@ namespace Cyberspeed.CardMatch.Cards
             public Ease EaseIn = Ease.InQuad;
             public Ease EaseOut = Ease.OutQuad;
         }
-        
+
         [System.Serializable]
         private class ShakeSettings
         {
@@ -201,7 +210,7 @@ namespace Cyberspeed.CardMatch.Cards
             public float ShrinkDuration = 0.3f;
             public Ease ShrinkEase = Ease.InBack;
         }
-        
+
         #endregion
     }
 }

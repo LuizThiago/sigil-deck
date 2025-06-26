@@ -9,7 +9,8 @@ namespace Cyberspeed.CardMatch.Game
     public class GameManager : MonoBehaviour
     {
         [SerializeField] private GameSessionController _sessionController;
-
+        [SerializeField] private ScoreController _scoreController;
+        
         private void Start()
         {
             StartNewGame();
@@ -17,6 +18,7 @@ namespace Cyberspeed.CardMatch.Game
 
         private void StartNewGame()
         {
+            _scoreController.ResetScore();
             _sessionController.CreateNewSession();
         }
     }

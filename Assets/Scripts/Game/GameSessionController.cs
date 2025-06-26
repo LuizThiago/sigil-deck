@@ -25,6 +25,7 @@ namespace Cyberspeed.CardMatch.Game
         [Header("References")]
         [SerializeField] private Card _cardPrefab;
         [SerializeField] private GridLayoutGroup _grid;
+        [SerializeField] private ScoreController _scoreController;
 
         private BoardBuilder _boardBuilder;
         private PairEvaluator _pairEvaluator;
@@ -43,12 +44,14 @@ namespace Cyberspeed.CardMatch.Game
             ClearBoard();
 
             _boardBuilder = new BoardBuilder(_cardPrefab, _grid, _pairRange, _maxRows, _maxColumns);
-            _pairEvaluator = new PairEvaluator(this, _boardBuilder, _delay, _failLimit, OnVictory, OnGameOver);
+            _pairEvaluator = new PairEvaluator(this, _boardBuilder, _delay, _failLimit, OnVictory, OnGameOver, OnScoreMatch, OnFail);
 
             _boardBuilder.OnCardClicked += _pairEvaluator.HandleCardClicked;
 
             _boardBuilder.BuildBoard();
             _pairEvaluator.Start();
+            
+            _scoreController.SetLives(_failLimit);
         }
 
         /// <summary>
@@ -68,7 +71,22 @@ namespace Cyberspeed.CardMatch.Game
         private void OnGameOver()
         {
             Debug.Log("Game Over!");
+            _scoreController.ResetScore();
             StartCoroutine(RestartGameAfterDelay());
+        }
+        
+        /// <summary>
+        /// Handles the score match event.
+        /// </summary>
+        private void OnScoreMatch()
+        {
+            Debug.Log("Match!");
+            _scoreController.ScoreMatch();
+        }
+        
+        private void OnFail(int remaining)
+        {
+            _scoreController.SetLives(remaining);
         }
 
         /// <summary>

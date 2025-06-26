@@ -20,6 +20,8 @@ namespace Cyberspeed.CardMatch.Game
         private readonly int _failLimit;
         private readonly Action _onVictory;
         private readonly Action _onGameOver;
+        private readonly Action _onMatch;
+        private readonly Action<int> _onFail;
         private readonly MonoBehaviour _runner;
         private readonly BoardBuilder _boardBuilder;
         private readonly Queue<PairCheckRequest> _queue = new();
@@ -38,7 +40,9 @@ namespace Cyberspeed.CardMatch.Game
         /// <param name="failLimit">The number of allowed fails before game over. -1 for infinite.</param>
         /// <param name="onVictory">Action to invoke when all pairs are found.</param>
         /// <param name="onGameOver">Action to invoke when the fail limit is reached.</param>
-        public PairEvaluator(MonoBehaviour runner, BoardBuilder boardBuilder, float delay, int failLimit, Action onVictory, Action onGameOver)
+        /// <param name="onMatch">Action to invoke when a pair is found.</param>
+        /// <param name="onFail">Action to invoke when a pair is found.</param>
+        public PairEvaluator(MonoBehaviour runner, BoardBuilder boardBuilder, float delay, int failLimit, Action onVictory, Action onGameOver, Action onMatch, Action<int> onFail)
         {
             _runner = runner;
             _boardBuilder = boardBuilder;
@@ -46,6 +50,8 @@ namespace Cyberspeed.CardMatch.Game
             _failLimit = failLimit;
             _onVictory = onVictory;
             _onGameOver = onGameOver;
+            _onMatch = onMatch;
+            _onFail = onFail;
         }
 
         /// <summary>
@@ -106,29 +112,11 @@ namespace Cyberspeed.CardMatch.Game
 
                     if (pair.First.Symbol == pair.Second.Symbol)
                     {
-                        AudioManager.Instance.PlaySfx(SoundType.MatchSuccess);
-                        pair.First.DisableCard();
-                        pair.Second.DisableCard();
-                        _pairsFound++;
-
-                        if (_pairsFound >= _boardBuilder.TotalPairs)
-                        {
-                            _gameOver = true;
-                            _onVictory?.Invoke();
-                        }
+                        OnMatch(pair);
                     }
                     else
                     {
-                        AudioManager.Instance.PlaySfx(SoundType.MatchFail);
-                        pair.First.MissCard();
-                        pair.Second.MissCard();
-                        _fails++;
-
-                        if (_failLimit > 0 && _fails >= _failLimit)
-                        {
-                            _gameOver = true;
-                            _onGameOver?.Invoke();
-                        }
+                        OnFail(pair);
                     }
                 }
                 else
@@ -142,6 +130,46 @@ namespace Cyberspeed.CardMatch.Game
             {
                 _buffer[0].MissCard();
                 _buffer.Clear();
+            }
+        }
+
+        /// <summary>
+        /// Handles a failed pair check request.
+        /// </summary>
+        /// <param name="pair"></param>
+        private void OnFail(PairCheckRequest pair)
+        {
+            AudioManager.Instance.PlaySfx(SoundType.MatchFail);
+            pair.First.MissCard();
+            pair.Second.MissCard();
+            _fails++;
+            
+            _onFail?.Invoke(_failLimit - _fails);
+
+            if (_failLimit > 0 && _fails >= _failLimit)
+            {
+                _gameOver = true;
+                _onGameOver?.Invoke();
+            }
+        }
+
+        /// <summary>
+        /// Handles a successful pair check request.
+        /// </summary>
+        /// <param name="pair"></param>
+        private void OnMatch(PairCheckRequest pair)
+        {
+            AudioManager.Instance.PlaySfx(SoundType.MatchSuccess);
+            pair.First.DisableCard();
+            pair.Second.DisableCard();
+            _pairsFound++;
+                     
+            _onMatch?.Invoke();
+
+            if (_pairsFound >= _boardBuilder.TotalPairs)
+            {
+                _gameOver = true;
+                _onVictory?.Invoke();
             }
         }
 

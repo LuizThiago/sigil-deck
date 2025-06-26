@@ -20,7 +20,7 @@ namespace Cyberspeed.CardMatch.Cards
 
         private CardState _currentState = CardState.Hidden;
         private bool _isBlocked = false;
-        
+
         public bool IsBlocked => _isBlocked || _currentState == CardState.Disabled;
 
         /// <summary>
@@ -37,7 +37,7 @@ namespace Cyberspeed.CardMatch.Cards
         public void Initialize(int symbol)
         {
             Symbol = symbol;
-            _visualController.SetSymbolText(Symbol.ToString());
+            _visualController.SetSymbol(Symbol);
         }
 
         #endregion

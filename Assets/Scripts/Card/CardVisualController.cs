@@ -1,5 +1,7 @@
 using Cyberspeed.CardMatch.Enums;
+
 using TMPro;
+
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,8 +13,9 @@ namespace Cyberspeed.CardMatch.Cards
     public class CardVisualController : MonoBehaviour
     {
         [SerializeField] private GameObject _root;
-        [SerializeField] private CardVisual _frontVisual;
-        [SerializeField] private CardVisual _backVisual;
+        [SerializeField] private Image _frontVisual;
+        [SerializeField] private Image _backVisual;
+        [SerializeField] private Sprite[] _symbols;
 
         #region Public Methods
 
@@ -29,35 +32,20 @@ namespace Cyberspeed.CardMatch.Cards
         }
 
         /// <summary>
-        /// Sets the symbol text on the front of the card.
+        /// Sets the symbol index on the front of the card.
         /// </summary>
-        /// <param name="symbol">The symbol to display.</param>
-        public void SetSymbolText(string symbol)
+        /// <param name="index">The index of the symbol to display.</param>
+        public void SetSymbol(int index)
         {
-            _frontVisual.SetSymbolText(symbol);
+            if (index < 0 || index >= _symbols.Length)
+            {
+                Debug.LogError($"Invalid symbol index: {index}");
+                return;
+            }
+
+            _frontVisual.sprite = _symbols[index];
         }
 
         #endregion
-
-        /// <summary>
-        /// Represents the visual elements of one side of a card (front or back).
-        /// </summary>
-        [System.Serializable]
-        private class CardVisual
-        {
-            [SerializeField] private Image _image;
-            [SerializeField] private TMP_Text _symbolText;
-
-            public Image Image => _image;
-
-            /// <summary>
-            /// Sets the symbol text.
-            /// </summary>
-            /// <param name="symbol">The text to display as the symbol.</param>
-            public void SetSymbolText(string symbol)
-            {
-                _symbolText.text = symbol;
-            }
-        }
     }
 }

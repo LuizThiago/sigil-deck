@@ -8,6 +8,10 @@ using UnityEngine;
 
 namespace Cyberspeed.CardMatch.Game
 {
+    /// <summary>
+    /// Processes card pair evaluation requests. It manages a queue of selected card pairs,
+    /// checks if they are a match, and triggers victory or game-over conditions.
+    /// </summary>
     public class PairEvaluator
     {
         private readonly WaitForSeconds _wait;
@@ -23,6 +27,15 @@ namespace Cyberspeed.CardMatch.Game
         private bool _gameOver;
         private Coroutine _processingCoroutine;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="PairEvaluator"/> class.
+        /// </summary>
+        /// <param name="runner">The MonoBehaviour to run the processing coroutine on.</param>
+        /// <param name="boardBuilder">Reference to the board builder to get total pair count.</param>
+        /// <param name="delay">The delay between evaluating pairs.</param>
+        /// <param name="failLimit">The number of allowed fails before game over. -1 for infinite.</param>
+        /// <param name="onVictory">Action to invoke when all pairs are found.</param>
+        /// <param name="onGameOver">Action to invoke when the fail limit is reached.</param>
         public PairEvaluator(MonoBehaviour runner, BoardBuilder boardBuilder, float delay, int failLimit, Action onVictory, Action onGameOver)
         {
             _runner = runner;
@@ -33,17 +46,28 @@ namespace Cyberspeed.CardMatch.Game
             _onGameOver = onGameOver;
         }
 
+        /// <summary>
+        /// Starts the pair processing queue.
+        /// </summary>
         public void Start()
         {
             _processingCoroutine = _runner.StartCoroutine(ProcessQueue());
         }
 
+        /// <summary>
+        /// Stops the pair processing queue.
+        /// </summary>
         public void Stop()
         {
             if (_processingCoroutine != null)
                 _runner.StopCoroutine(_processingCoroutine);
         }
 
+        /// <summary>
+        /// Handles a card click event. Adds the card to a buffer and, if the buffer is full,
+        /// enqueues a new pair check request.
+        /// </summary>
+        /// <param name="card">The card that was clicked.</param>
         public void HandleCardClicked(Card card)
         {
             if (_gameOver || _buffer.Contains(card)) return;
@@ -58,6 +82,10 @@ namespace Cyberspeed.CardMatch.Game
             _buffer.Clear();
         }
 
+        /// <summary>
+        /// Processes the queue of pair check requests.
+        /// </summary>
+        /// <returns>An IEnumerator that can be used to process the queue.</returns>
         private IEnumerator ProcessQueue()
         {
             while (!_gameOver)
@@ -113,6 +141,9 @@ namespace Cyberspeed.CardMatch.Game
             }
         }
 
+        /// <summary>
+        /// Represents a request to check if two cards form a pair.
+        /// </summary>
         private class PairCheckRequest
         {
             public Card First;

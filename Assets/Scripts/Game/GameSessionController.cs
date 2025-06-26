@@ -7,6 +7,9 @@ using UnityEngine.UI;
 
 namespace Cyberspeed.CardMatch.Game
 {
+    /// <summary>
+    /// Manages a single game session, from setting up the board to handling victory and game-over states.
+    /// </summary>
     public class GameSessionController : MonoBehaviour
     {
         [Header("Settings")]
@@ -24,6 +27,10 @@ namespace Cyberspeed.CardMatch.Game
         private BoardBuilder _boardBuilder;
         private PairEvaluator _pairEvaluator;
 
+        /// <summary>
+        /// Creates and starts a new game session.
+        /// It clears the previous board and sets up a new one.
+        /// </summary>
         public void CreateNewSession()
         {
             StopAllCoroutines();
@@ -41,24 +48,38 @@ namespace Cyberspeed.CardMatch.Game
             _pairEvaluator.Start();
         }
 
+        /// <summary>
+        /// Handles the victory state of the game.
+        /// It restarts the game after a delay.
+        /// </summary>
         private void OnVictory()
         {
             Debug.Log("Victory!");
             StartCoroutine(RestartGameAfterDelay());
         }
 
+        /// <summary>
+        /// Handles the game-over state of the game.
+        /// It restarts the game after a delay.
+        /// </summary>
         private void OnGameOver()
         {
             Debug.Log("Game Over!");
             StartCoroutine(RestartGameAfterDelay());
         }
 
+        /// <summary>
+        /// Restarts the game after a delay.
+        /// </summary>
         private IEnumerator RestartGameAfterDelay()
         {
             yield return new WaitForSeconds(_restartDelay);
             CreateNewSession();
         }
 
+        /// <summary>
+        /// Clears the board by destroying all child objects.
+        /// </summary>
         private void ClearBoard()
         {
             if (_boardBuilder != null)

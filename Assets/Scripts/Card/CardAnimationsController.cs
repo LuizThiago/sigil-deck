@@ -6,6 +6,10 @@ using UnityEngine;
 
 namespace Cyberspeed.CardMatch.Cards
 {
+    /// <summary>
+    /// Controls all animations for a card, such as flipping, shaking, and scaling.
+    /// It uses DOTween for smooth and efficient animations.
+    /// </summary>
     public class CardAnimationsController : MonoBehaviour
     {
         [Header("References")]
@@ -36,6 +40,9 @@ namespace Cyberspeed.CardMatch.Cards
 
         #region Public Methods
 
+        /// <summary>
+        /// Resets all animations and returns the card to its initial visual state.
+        /// </summary>
         public void ResetAnimations()
         {
             KillCurrentTween();
@@ -45,6 +52,9 @@ namespace Cyberspeed.CardMatch.Cards
             _rectTransform.localPosition = _initialPosition;
         }
 
+        /// <summary>
+        /// Plays a punch scale animation on the card, typically used for hover effects.
+        /// </summary>
         public void PlayPunchScale()
         {
             if (_isPlayingAnimation || (_currentTween != null && _currentTween.IsActive())) return;
@@ -57,10 +67,25 @@ namespace Cyberspeed.CardMatch.Cards
             ).SetUpdate(true);
         }
 
+        /// <summary>
+        /// Plays the reveal animation, flipping the card from back to front.
+        /// </summary>
+        /// <param name="onComplete">An optional action to invoke when the animation is complete.</param>
         public void PlayReveal(Action onComplete = null) => PlayFlip(_backVisual, _frontVisual, _flipSettings, onComplete);
 
+        /// <summary>
+        /// Plays the hide animation, flipping the card from front to back.
+        /// </summary>
+        /// <param name="onComplete">An optional action to invoke when the animation is complete.</param>
         public void PlayHide(Action onComplete = null) => PlayFlip(_frontVisual, _backVisual, _flipSettings, onComplete);
 
+        /// <summary>
+        /// Plays the flip animation, flipping the card from one side to the other.
+        /// </summary>
+        /// <param name="from">The transform of the card's front side.</param>
+        /// <param name="to">The transform of the card's back side.</param>
+        /// <param name="settings">The settings for the flip animation.</param>
+        /// <param name="onComplete">An optional action to invoke when the animation is complete.</param>
         private void PlayFlip(Transform from, Transform to, FlipSettings settings, Action onComplete = null)
         {
             KillCurrentTween();
@@ -93,6 +118,10 @@ namespace Cyberspeed.CardMatch.Cards
             });
         }
 
+        /// <summary>
+        /// Plays a shake animation, typically used to indicate a failed match.
+        /// </summary>
+        /// <param name="onComplete">An optional action to invoke when the animation is complete.</param>
         public void PlayShake(Action onComplete = null)
         {
             KillCurrentTween();
@@ -115,6 +144,10 @@ namespace Cyberspeed.CardMatch.Cards
                 });
         }
 
+        /// <summary>
+        /// Plays a destroy animation for when a card is successfully matched and removed from the board.
+        /// </summary>
+        /// <param name="onComplete">An optional action to invoke when the animation is complete.</param>
         public void PlayDestroy(Action onComplete = null)
         {
             KillCurrentTween();
@@ -143,6 +176,9 @@ namespace Cyberspeed.CardMatch.Cards
 
         #region Utils
 
+        /// <summary>
+        /// Caches the initial state of the card, including its scale, rotation, and position.
+        /// </summary>
         private void CacheInitialState()
         {
             _initialScale = _rectTransform.localScale;
@@ -150,6 +186,9 @@ namespace Cyberspeed.CardMatch.Cards
             _initialPosition = _rectTransform.localPosition;
         }
 
+        /// <summary>
+        /// Kills the current tween and sequence, and resets the card's scale to its initial value.
+        /// </summary>
         private void KillCurrentTween()
         {
             _isPlayingAnimation = false;
@@ -173,6 +212,9 @@ namespace Cyberspeed.CardMatch.Cards
 
         #region Animation Settings
 
+        /// <summary>
+        /// Settings for the punch scale animation.
+        /// </summary>
         [System.Serializable]
         private class PunchScaleSettings
         {
@@ -182,6 +224,9 @@ namespace Cyberspeed.CardMatch.Cards
             public float Elasticity = 1f;
         }
 
+        /// <summary>
+        /// Settings for the flip animation.
+        /// </summary>
         [System.Serializable]
         private class FlipSettings
         {
@@ -190,6 +235,9 @@ namespace Cyberspeed.CardMatch.Cards
             public Ease EaseOut = Ease.OutQuad;
         }
 
+        /// <summary>
+        /// Settings for the shake animation.
+        /// </summary>
         [System.Serializable]
         private class ShakeSettings
         {
@@ -200,6 +248,9 @@ namespace Cyberspeed.CardMatch.Cards
             public bool FadeOut = true;
         }
 
+        /// <summary>
+        /// Settings for the destroy animation.
+        /// </summary>
         [System.Serializable]
         private class DestroySettings
         {

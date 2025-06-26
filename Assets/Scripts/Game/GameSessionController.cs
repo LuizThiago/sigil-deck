@@ -1,6 +1,8 @@
 using System.Collections;
 
 using Cyberspeed.CardMatch.Cards;
+using Cyberspeed.CardMatch.Audio;
+using Cyberspeed.CardMatch.Enums;
 
 using UnityEngine;
 using UnityEngine.UI;
@@ -33,6 +35,7 @@ namespace Cyberspeed.CardMatch.Game
         /// </summary>
         public void CreateNewSession()
         {
+            AudioManager.Instance.PlaySfx(SoundType.GameStart);
             StopAllCoroutines();
 
             _pairEvaluator?.Stop();

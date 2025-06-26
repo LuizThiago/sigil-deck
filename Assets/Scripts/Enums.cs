@@ -18,5 +18,28 @@ namespace Cyberspeed.CardMatch.Enums
         /// </summary>
         Disabled
     }
+
+    /// <summary>
+    /// Represents the different states of the game session.
+    /// </summary>
+    public enum GameState
+    {
+        Menu,
+        GameInProgress,
+        Paused,
+        GameOver
+    }
+
+    /// <summary>
+    /// Represents the different types of sound effects.
+    /// </summary>
+    public enum SoundType
+    {
+        GameStart,
+        CardFlip,
+        MatchSuccess,
+        MatchFail,
+        CardPointerEnter
+    }
 }
 

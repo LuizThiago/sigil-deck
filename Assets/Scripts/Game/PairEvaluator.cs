@@ -3,6 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 
 using Cyberspeed.CardMatch.Cards;
+using Cyberspeed.CardMatch.Audio;
+using Cyberspeed.CardMatch.Enums;
 
 using UnityEngine;
 
@@ -104,6 +106,7 @@ namespace Cyberspeed.CardMatch.Game
 
                     if (pair.First.Symbol == pair.Second.Symbol)
                     {
+                        AudioManager.Instance.PlaySfx(SoundType.MatchSuccess);
                         pair.First.DisableCard();
                         pair.Second.DisableCard();
                         _pairsFound++;
@@ -116,6 +119,7 @@ namespace Cyberspeed.CardMatch.Game
                     }
                     else
                     {
+                        AudioManager.Instance.PlaySfx(SoundType.MatchFail);
                         pair.First.MissCard();
                         pair.Second.MissCard();
                         _fails++;

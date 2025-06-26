@@ -1,6 +1,7 @@
 using System;
 
 using Cyberspeed.CardMatch.Enums;
+using Cyberspeed.CardMatch.Audio;
 
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -113,6 +114,7 @@ namespace Cyberspeed.CardMatch.Cards
 
         public void OnPointerEnter(PointerEventData eventData)
         {
+            AudioManager.Instance.PlaySfx(SoundType.CardPointerEnter);
             _animationsController.PlayPunchScale();
         }
 
@@ -125,6 +127,7 @@ namespace Cyberspeed.CardMatch.Cards
         {
             if (IsBlocked || _currentState == CardState.Revealed) return;
 
+            AudioManager.Instance.PlaySfx(SoundType.CardFlip);
             OnCardClicked?.Invoke(this);
         }
 
